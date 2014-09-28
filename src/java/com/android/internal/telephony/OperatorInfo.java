@@ -36,6 +36,7 @@ public class OperatorInfo implements Parcelable {
 
     private State mState = State.UNKNOWN;
 
+    private String mRadioTech = "";
 
     public String
     getOperatorAlphaLong() {
@@ -57,6 +58,11 @@ public class OperatorInfo implements Parcelable {
         return mState;
     }
 
+    public String
+    getRadioTech() {
+        return mRadioTech;
+    }
+
     OperatorInfo(String operatorAlphaLong,
                 String operatorAlphaShort,
                 String operatorNumeric,
@@ -64,7 +70,16 @@ public class OperatorInfo implements Parcelable {
 
         mOperatorAlphaLong = operatorAlphaLong;
         mOperatorAlphaShort = operatorAlphaShort;
+
         mOperatorNumeric = operatorNumeric;
+        mRadioTech = "";
+        /* operatorNumeric format: PLMN+RAT or PLMN */
+        if (null != operatorNumeric) {
+            String values[] = operatorNumeric.split("\\+");
+            mOperatorNumeric = values[0];
+            if (values.length > 1)
+                mRadioTech = values[1];
+        }
 
         mState = state;
     }
@@ -100,9 +115,10 @@ public class OperatorInfo implements Parcelable {
     @Override
     public String toString() {
         return "OperatorInfo " + mOperatorAlphaLong
-                + "/" + mOperatorAlphaShort
-                + "/" + mOperatorNumeric
-                + "/" + mState;
+               + "/" + mOperatorAlphaShort
+               + "/" + mOperatorNumeric
+               + "/" + mState
+               + "/" + mRadioTech;
     }
 
     /**
@@ -126,7 +142,7 @@ public class OperatorInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mOperatorAlphaLong);
         dest.writeString(mOperatorAlphaShort);
-        dest.writeString(mOperatorNumeric);
+        dest.writeString(mOperatorNumeric + "+" + mRadioTech);
         dest.writeSerializable(mState);
     }
 
@@ -151,4 +167,23 @@ public class OperatorInfo implements Parcelable {
                 return new OperatorInfo[size];
             }
         };
+
+    @Override
+    public boolean equals (Object o) {
+        OperatorInfo s;
+
+        try {
+            s = (OperatorInfo) o;
+        } catch (ClassCastException ex) {
+            return false;
+        }
+
+        if (o == null) {
+            return false;
+        }
+
+        return mOperatorAlphaLong.equals(s.getOperatorAlphaLong()) &&
+                mOperatorAlphaShort.equals(s.getOperatorAlphaShort()) &&
+                mOperatorNumeric.equals(s.getOperatorNumeric());
+    }
 }
